@@ -83,13 +83,12 @@ export default function Home() {
 
 function Tarefas() {
   const [challenges, setChallenges] = useState<any[]>([])
-  const [completed, setCompleted] = useState<Record<string, boolean>>({})
+  const [completed, setCompleted] = useState<Record<string, any>>({})
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState<string | null>(null)
 
-  // 🔥 DATA DE INÍCIO (AJUSTA AQUI)
-  const START_DATE = new Date('2026-04-07')
+  const START_DATE = new Date('2026-04-06')
 
   const getCurrentDay = () => {
     const now = new Date()
@@ -130,13 +129,13 @@ function Tarefas() {
 
       const { data: submissionsData } = await supabase
         .from('submissions')
-        .select('challenge_id')
+        .select('challenge_id, image_url')
         .eq('user_id', currentUser.id)
 
-      const completedMap: Record<string, boolean> = {}
+      const completedMap: Record<string, any> = {}
 
       submissionsData?.forEach((sub) => {
-        completedMap[sub.challenge_id] = true
+        completedMap[sub.challenge_id] = sub.image_url
       })
 
       setCompleted(completedMap)
@@ -145,6 +144,16 @@ function Tarefas() {
 
     init()
   }, [])
+
+  const getImageUrl = (path: any) => {
+    if (!path || typeof path !== 'string') return ''
+
+    const { data } = supabase.storage
+      .from('challenge_images')
+      .getPublicUrl(path)
+
+    return data.publicUrl
+  }
 
   const handleUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -183,13 +192,12 @@ function Tarefas() {
 
     setCompleted((prev) => ({
       ...prev,
-      [challengeId]: true,
+      [challengeId]: filePath,
     }))
 
     setUploading(null)
   }
 
-  // 🔒 LIBERA APENAS O DIA ATUAL
   const isDayUnlocked = (day: number) => {
     return day === currentDay
   }
@@ -213,37 +221,37 @@ function Tarefas() {
       : 0
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="bg-[#0f172a]/70 backdrop-blur-xl p-6 rounded-2xl shadow-lg">
+    <div className="max-w-5xl mx-auto px-2 md:px-0">
+      <div className="bg-[#0f172a]/70 backdrop-blur-xl p-4 md:p-6 rounded-2xl shadow-lg">
 
         {/* HEADER */}
-        <h3 className="text-2xl font-bold mb-2">
+        <h3 className="text-xl md:text-2xl font-bold mb-2">
           🚀 Desafio 21 Dias
         </h3>
 
-        <p className="text-[#ded0e7]/70 mb-6">
+        <p className="text-sm md:text-base text-[#ded0e7]/70 mb-6">
           Construa hábitos e acompanhe sua evolução diária
         </p>
 
         {/* PROGRESSO */}
-        <div className="mb-8">
-          <div className="flex justify-between text-sm mb-2">
+        <div className="mb-6 md:mb-8">
+          <div className="flex justify-between text-xs md:text-sm mb-2">
             <span className="text-[#ded0e7]/70">Progresso</span>
             <span className="font-semibold text-[#8ac64c]">
               {progressPercentage}%
             </span>
           </div>
 
-          <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-gray-800 rounded-full h-2 md:h-3 overflow-hidden">
             <div
-              className="bg-[#8ac64c] h-3 rounded-full transition-all duration-500"
+              className="bg-[#8ac64c] h-2 md:h-3 rounded-full transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
         </div>
 
         {/* SEMANAS */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
           {[1, 2, 3].map((week) => {
             const unlockedWeek = week === currentWeek
 
@@ -255,12 +263,12 @@ function Tarefas() {
                   setSelectedWeek(week)
                   setSelectedDay((week - 1) * 7 + 1)
                 }}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                className={`min-w-[100px] px-4 py-3 rounded-xl text-sm ${
                   unlockedWeek
                     ? selectedWeek === week
                       ? 'bg-[#ad3372] text-white'
                       : 'bg-gray-800 text-gray-400'
-                    : 'bg-gray-800 opacity-30 cursor-not-allowed'
+                    : 'bg-gray-800 opacity-30'
                 }`}
               >
                 Semana {week}
@@ -270,7 +278,7 @@ function Tarefas() {
         </div>
 
         {/* DIAS */}
-        <div className="flex gap-2 overflow-x-auto mb-6 pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
           {getDaysFromWeek(selectedWeek).map((day) => {
             const unlocked = isDayUnlocked(day)
             const isActive = selectedDay === day
@@ -280,13 +288,13 @@ function Tarefas() {
                 key={day}
                 disabled={!unlocked}
                 onClick={() => unlocked && setSelectedDay(day)}
-                className={`min-w-[70px] px-3 py-2 rounded-xl text-sm font-medium transition-all
+                className={`min-w-[80px] px-3 py-3 rounded-xl text-sm
                   ${
                     isActive
-                      ? 'bg-[#ad3372] text-white shadow-md scale-105'
+                      ? 'bg-[#ad3372] text-white'
                       : unlocked
-                      ? 'bg-gray-800 hover:bg-gray-700'
-                      : 'bg-gray-800 opacity-30 cursor-not-allowed'
+                      ? 'bg-gray-800'
+                      : 'bg-gray-800 opacity-30'
                   }
                 `}
               >
@@ -298,55 +306,69 @@ function Tarefas() {
 
         {/* DESAFIOS */}
         {filteredChallenges.length === 0 && (
-          <p className="text-[#ded0e7]/70">
+          <p className="text-[#ded0e7]/70 text-sm">
             Nenhum desafio para este dia.
           </p>
         )}
 
         {filteredChallenges.map((challenge) => {
-          const isDone = completed[challenge.id]
+          const imagePath = completed[challenge.id]
+          const isDone = !!imagePath
 
           return (
             <div
               key={challenge.id}
-              className="bg-gray-900 hover:bg-gray-800 transition-all p-5 rounded-xl mb-4 border border-gray-800"
+              className="bg-gray-900 p-4 md:p-5 rounded-xl mb-4 border border-gray-800"
             >
-              <div className="flex justify-between items-start mb-2">
-                <p className="font-semibold text-lg">
-                  {challenge.title}
-                </p>
+              <div className="flex justify-between items-center mb-2">
 
-                {isDone && (
-                  <span className="text-[#8ac64c] text-sm font-medium">
-                    ✅ Concluído
-                  </span>
+                <div className="flex-1">
+                  <p className="font-semibold text-base md:text-lg">
+                    {challenge.title}
+                  </p>
+
+                  {isDone && (
+                    <span className="text-[#8ac64c] text-xs md:text-sm">
+                      ✅ Concluído
+                    </span>
+                  )}
+                </div>
+
+                {isDone && typeof imagePath === 'string' && (
+                  <img
+                    src={getImageUrl(imagePath)}
+                    alt="comprovacao"
+                    className="w-14 h-14 md:w-16 md:h-16 object-cover rounded-lg"
+                  />
                 )}
               </div>
 
-              <p className="text-gray-400 text-sm mb-4">
+              <p className="text-gray-400 text-xs md:text-sm mb-3 md:mb-4">
                 {challenge.description}
               </p>
 
-             {!isDone && (
-  <div>
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) => handleUpload(e, challenge.id)}
-      className="hidden"
-      id={`upload-${challenge.id}`}
-    />
+              {!isDone && (
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      handleUpload(e, challenge.id)
+                    }
+                    className="hidden"
+                    id={`upload-${challenge.id}`}
+                  />
 
-    <label
-      htmlFor={`upload-${challenge.id}`}
-      className="inline-block bg-[#8ac64c] px-4 py-2 rounded-lg cursor-pointer text-sm font-medium hover:opacity-90"
-    >
-      {uploading === challenge.id
-        ? 'Enviando...'
-        : 'Enviar Comprovação'}
-    </label>
-  </div>
-)}
+                  <label
+                    htmlFor={`upload-${challenge.id}`}
+                    className="inline-block bg-[#8ac64c] px-3 md:px-4 py-2 rounded-lg cursor-pointer text-xs md:text-sm font-medium"
+                  >
+                    {uploading === challenge.id
+                      ? 'Enviando...'
+                      : 'Enviar'}
+                  </label>
+                </div>
+              )}
             </div>
           )
         })}
