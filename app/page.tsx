@@ -406,11 +406,7 @@ function Ranking() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <img
-                  src={userRank.avatar_url}
-                  alt="avatar"
-                  className="w-10 h-10 rounded-full"
-                />
+                
 
                 <div>
                   <p className="font-medium">
