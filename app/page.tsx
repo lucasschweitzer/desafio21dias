@@ -39,7 +39,7 @@ export default function Home() {
       {/* HEADER DA PÁGINA */}
       <div className="mb-6">
         <h2 className="text-3xl font-bold mb-1">
-          👋 Bem-vindo ao desafio
+          👋 Bem-vindo ao desafio Reset 21!
         </h2>
 
         <p className="text-[#ded0e7]/70">
@@ -87,10 +87,28 @@ function Tarefas() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState<string | null>(null)
-  const [selectedDay, setSelectedDay] = useState<number>(1)
 
+  // 🔥 DATA DE INÍCIO (AJUSTA AQUI)
+  const START_DATE = new Date('2026-04-07')
 
+  const getCurrentDay = () => {
+    const now = new Date()
+    const diffTime = now.getTime() - START_DATE.getTime()
+    const diffDays =
+      Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
 
+    return Math.max(1, Math.min(diffDays, 21))
+  }
+
+  const getCurrentWeek = () => {
+    return Math.ceil(getCurrentDay() / 7)
+  }
+
+  const currentDay = getCurrentDay()
+  const currentWeek = getCurrentWeek()
+
+  const [selectedDay, setSelectedDay] = useState<number>(currentDay)
+  const [selectedWeek, setSelectedWeek] = useState<number>(currentWeek)
 
   useEffect(() => {
     const init = async () => {
@@ -171,16 +189,14 @@ function Tarefas() {
     setUploading(null)
   }
 
+  // 🔒 LIBERA APENAS O DIA ATUAL
   const isDayUnlocked = (day: number) => {
-    if (day === 1) return true
+    return day === currentDay
+  }
 
-    const previousDayChallenges = challenges.filter(
-      (c) => Number(c.day_number) === day - 1
-    )
-
-    return previousDayChallenges.every(
-      (c) => completed[c.id]
-    )
+  const getDaysFromWeek = (week: number) => {
+    const start = (week - 1) * 7 + 1
+    return Array.from({ length: 7 }, (_, i) => start + i)
   }
 
   if (loading) return <p>Carregando tarefas...</p>
@@ -205,14 +221,14 @@ function Tarefas() {
           🚀 Desafio 21 Dias
         </h3>
 
-        <p className="text-gray-400 mb-6">
+        <p className="text-[#ded0e7]/70 mb-6">
           Construa hábitos e acompanhe sua evolução diária
         </p>
 
         {/* PROGRESSO */}
         <div className="mb-8">
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-400">Progresso</span>
+            <span className="text-[#ded0e7]/70">Progresso</span>
             <span className="font-semibold text-[#8ac64c]">
               {progressPercentage}%
             </span>
@@ -226,9 +242,36 @@ function Tarefas() {
           </div>
         </div>
 
+        {/* SEMANAS */}
+        <div className="flex gap-2 mb-4">
+          {[1, 2, 3].map((week) => {
+            const unlockedWeek = week === currentWeek
+
+            return (
+              <button
+                key={week}
+                disabled={!unlockedWeek}
+                onClick={() => {
+                  setSelectedWeek(week)
+                  setSelectedDay((week - 1) * 7 + 1)
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  unlockedWeek
+                    ? selectedWeek === week
+                      ? 'bg-[#ad3372] text-white'
+                      : 'bg-gray-800 text-gray-400'
+                    : 'bg-gray-800 opacity-30 cursor-not-allowed'
+                }`}
+              >
+                Semana {week}
+              </button>
+            )
+          })}
+        </div>
+
         {/* DIAS */}
         <div className="flex gap-2 overflow-x-auto mb-6 pb-2">
-          {Array.from({ length: 21 }, (_, i) => i + 1).map((day) => {
+          {getDaysFromWeek(selectedWeek).map((day) => {
             const unlocked = isDayUnlocked(day)
             const isActive = selectedDay === day
 
@@ -247,7 +290,7 @@ function Tarefas() {
                   }
                 `}
               >
-                {unlocked ? `Dia ${day}` : '🔒'}
+                {day === currentDay ? `🔥 Dia ${day}` : '🔒'}
               </button>
             )
           })}
@@ -255,7 +298,7 @@ function Tarefas() {
 
         {/* DESAFIOS */}
         {filteredChallenges.length === 0 && (
-          <p className="text-gray-400">
+          <p className="text-[#ded0e7]/70">
             Nenhum desafio para este dia.
           </p>
         )}
@@ -274,7 +317,7 @@ function Tarefas() {
                 </p>
 
                 {isDone && (
-                  <span className="text-[#8ac64c]text-sm font-medium">
+                  <span className="text-[#8ac64c] text-sm font-medium">
                     ✅ Concluído
                   </span>
                 )}
@@ -285,7 +328,7 @@ function Tarefas() {
               </p>
 
               {!isDone && (
-                <label className="inline-block bg-gradient-to-r bg-[#8ac64c] px-4 py-2 rounded-lg cursor-pointer text-sm font-medium hover:opacity-90">
+                <label className="inline-block bg-[#8ac64c] px-4 py-2 rounded-lg cursor-pointer text-sm font-medium hover:opacity-90">
                   {uploading === challenge.id
                     ? 'Enviando...'
                     : 'Enviar Comprovação'}
