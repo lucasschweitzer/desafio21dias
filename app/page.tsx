@@ -158,7 +158,7 @@ function Tarefas() {
     const filePath = `${user.id}/${challengeId}-${Date.now()}.jpg`
 
     const { error: uploadError } = await supabase.storage
-      .from('proofs')
+      .from('challenge_images')
       .upload(filePath, file)
 
     if (uploadError) {
@@ -327,21 +327,26 @@ function Tarefas() {
                 {challenge.description}
               </p>
 
-              {!isDone && (
-                <label className="inline-block bg-[#8ac64c] px-4 py-2 rounded-lg cursor-pointer text-sm font-medium hover:opacity-90">
-                  {uploading === challenge.id
-                    ? 'Enviando...'
-                    : 'Enviar Comprovação'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) =>
-                      handleUpload(e, challenge.id)
-                    }
-                  />
-                </label>
-              )}
+             {!isDone && (
+  <div>
+    <input
+      type="file"
+      accept="image/*"
+      onChange={(e) => handleUpload(e, challenge.id)}
+      className="hidden"
+      id={`upload-${challenge.id}`}
+    />
+
+    <label
+      htmlFor={`upload-${challenge.id}`}
+      className="inline-block bg-[#8ac64c] px-4 py-2 rounded-lg cursor-pointer text-sm font-medium hover:opacity-90"
+    >
+      {uploading === challenge.id
+        ? 'Enviando...'
+        : 'Enviar Comprovação'}
+    </label>
+  </div>
+)}
             </div>
           )
         })}
