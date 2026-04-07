@@ -45,7 +45,7 @@ export default function Header() {
 
   return (
     <header className="border-b border-[#ad3372]/20 bg-[#0f172a]">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
 
         {/* LOGO */}
         <div className="flex items-center gap-3">
@@ -62,16 +62,18 @@ export default function Header() {
 
         {/* USER */}
        <div className="flex items-center gap-4">
-<div className="bg-[#0f172a] px-3 py-2 rounded-xl border border-white/10 w-fit">
-  <p className="text-xs text-[#ded0e7]/70">Olá,</p>
-  <p className="font-semibold text-sm text-white">
-    {name} 👋
-  </p>
-</div>
+  <div className="bg-[#0f172a] px-4 py-2 rounded-xl border border-white/10">
+    <p className="text-sm text-[#ded0e7]/70">
+      Olá,
+    </p>
+    <p className="font-semibold text-white">
+      {name} 👋
+    </p>
+  </div>
 
   <button
     onClick={handleLogout}
-    className="bg-[#ad3372] px-3 py-2 text-sm rounded-lg"
+    className="bg-[#ad3372] px-4 py-2 rounded-lg text-white font-medium hover:opacity-90"
   >
     Sair
   </button>
