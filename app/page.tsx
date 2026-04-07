@@ -39,7 +39,7 @@ export default function Home() {
       {/* HEADER DA PÁGINA */}
       <div className="mb-6">
         <h2 className="text-3xl font-bold mb-1">
-          👋 Bem-vindo ao desafio Reset 21!
+          👋 Bem-vindo(a) ao desafio Reset 21!
         </h2>
 
         <p className="text-[#ded0e7]/70">
