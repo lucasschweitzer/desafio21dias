@@ -38,6 +38,11 @@ export default function Header() {
     router.push('/login')
   }
 
+          const name =
+  user?.user_metadata?.name ||
+  user?.user_metadata?.full_name ||
+  user?.email?.split('@')[0]
+
   return (
     <header className="border-b border-[#ad3372]/20 bg-[#0f172a]">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -56,37 +61,23 @@ export default function Header() {
         </div>
 
         {/* USER */}
-        {user && (
-          <div className="flex items-center gap-4">
+       <div className="flex items-center gap-4">
+  <div className="bg-[#0f172a] px-4 py-2 rounded-xl border border-white/10">
+    <p className="text-sm text-[#ded0e7]/70">
+      Olá,
+    </p>
+    <p className="font-semibold text-white">
+      {name} 👋
+    </p>
+  </div>
 
-            {/* INFO */}
-            <div className="flex items-center gap-3 bg-gray-900 px-3 py-2 rounded-xl border border-gray-800">
-
-              {/* AVATAR */}
-              <div className="w-8 h-8 rounded-full bg-[#ad3372] flex items-center justify-center text-sm font-bold">
-                {user.profile?.name?.charAt(0) || 'U'}
-              </div>
-
-              {/* TEXTO */}
-              <div className="text-sm">
-                <p className="font-medium">
-                  {user.profile?.name || 'Usuário'}
-                </p>
-                <p className="text-[#ded0e7]/60 text-xs">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-
-            {/* LOGOUT */}
-            <button
-              onClick={handleLogout}
-              className="bg-[#ad3372] hover:opacity-90 transition px-3 py-2 rounded-lg text-sm font-medium"
-            >
-              Sair
-            </button>
-          </div>
-        )}
+  <button
+    onClick={handleLogout}
+    className="bg-[#ad3372] px-4 py-2 rounded-lg text-white font-medium hover:opacity-90"
+  >
+    Sair
+  </button>
+</div>
       </div>
     </header>
   )
