@@ -89,16 +89,25 @@ function Tarefas() {
   const [uploading, setUploading] = useState<string | null>(null)
 
   // 🔥 DATA DE INÍCIO (AJUSTA AQUI)
-  const START_DATE = new Date('2026-04-07')
+  const START_DATE = new Date('2026-04-07T00:00:00-03:00')
 
-  const getCurrentDay = () => {
-    const now = new Date()
-    const diffTime = now.getTime() - START_DATE.getTime()
-    const diffDays =
-      Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
+ const getCurrentDay = () => {
+  const now = new Date()
 
-    return Math.max(1, Math.min(diffDays, 21))
-  }
+  // 🔥 converte para horário do Brasil
+  const brasil = new Date(
+    now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })
+  )
+
+  const start = new Date(START_DATE)
+
+  const diffTime = brasil.getTime() - start.getTime()
+
+  const diffDays =
+    Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
+
+  return Math.max(1, Math.min(diffDays, 21))
+}
 
   const getCurrentWeek = () => {
     return Math.ceil(getCurrentDay() / 7)
